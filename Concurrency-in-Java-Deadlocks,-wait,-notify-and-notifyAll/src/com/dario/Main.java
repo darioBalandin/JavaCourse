@@ -16,30 +16,32 @@ class Message {
     private boolean empty = true;
 
     public synchronized String read() {
-        while(empty) {
+        while (empty) {
             try {
                 wait();
-            } catch(InterruptedException e) {
+            } catch (InterruptedException e) {
 
             }
 
         }
         empty = true;
+        System.out.println("Notifico desde read() y message es " + message);
         notifyAll();
         return message;
     }
 
     public synchronized void write(String message) {
-        while(!empty) {
+        while (!empty) {
             try {
                 wait();
-            } catch(InterruptedException e) {
+            } catch (InterruptedException e) {
 
             }
 
         }
         empty = false;
         this.message = message;
+        System.out.println("Notifico desde write() y seteo message a " + message);
         notifyAll();
     }
 }
@@ -61,13 +63,14 @@ class Writer implements Runnable {
 
         Random random = new Random();
 
-        for(int i=0; i<messages.length; i++) {
+        for (int i = 0; i < messages.length; i++) {
             message.write(messages[i]);
             try {
                 Thread.sleep(random.nextInt(2000));
-            } catch(InterruptedException e) {
-
+            } catch (InterruptedException e) {
+                e.printStackTrace();
             }
+            System.out.println("Estoy en el for loop de Writer::run() writing " + messages[i]);
         }
         message.write("Finished");
     }
@@ -82,12 +85,12 @@ class Reader implements Runnable {
 
     public void run() {
         Random random = new Random();
-        for(String latestMessage = message.read(); !latestMessage.equals("Finished");
-            latestMessage = message.read()) {
-            System.out.println(latestMessage);
+        for (String latestMessage = message.read(); !latestMessage.equals("Finished");
+             latestMessage = message.read()) {
+            System.out.println("Estoy en el for loop de Reader::run() reading " + latestMessage);
             try {
                 Thread.sleep(random.nextInt(2000));
-            } catch(InterruptedException e) {
+            } catch (InterruptedException e) {
 
             }
         }
